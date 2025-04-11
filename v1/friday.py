@@ -19,22 +19,41 @@ class App(tk.Frame):
 		self.scFont = tkFont.Font(family=n, size=4, weight="normal")
 		self.h = 30
 		self.w = 60
-		self.info = tk.Text(self.root,wrap='word', font=self.myFont, width=self.w, height=self.h)
+
+
+		self.topFrame = tk.Frame(self.root , width=500, height=800)
+  
+
+		self.info = tk.Text(self.topFrame ,wrap='word', undo=True,  font=self.myFont, width=self.w, height=self.h)
 		self.info.configure(background="black", foreground="white", highlightbackground="black" )
-		self.info.grid(row=3, column=1) 
+
+		tab_width = self.myFont.measure(' ' * 3)
+		self.info.config(tabs=(tab_width,))
+		self.info.grid(row=0, column=2, sticky="nsew") 
 		self.info.insert("1.0", 'friday')
 		# self.info.insert("2.0", "...")
 
+		self.infosb = tk.Scrollbar(self.topFrame , orient=tk.VERTICAL, command=self.info.yview)
+		self.info.configure(yscrollcommand=self.on_scroll)
+
 		self.sc = tk.Text(self.root ,wrap='word', font=self.scFont, width=60, height=self.h*2)
 		self.sc.configure(background="black", foreground="#ff1155", highlightbackground="black" )
-		self.sc.grid(row=3, column=2, padx = 6) 
+		self.sc.grid(row=3, column=5, padx = 6) 
 		# self.update()
 
-		self.num = tk.Text(self.root,wrap='word', font=self.myFont, width=2, height=self.h)
+		# self.numsb = tk.Scrollbar(root) 
+		# self.numsb.config(command=self.on_scroll)
+
+		self.num = tk.Text(self.topFrame ,wrap='word', font=self.myFont, width=3, height=self.h)
 		self.num.configure(background="black", foreground="#ff1155", highlightbackground="black" )
-		self.num.grid(row=3, column=0, padx = 6) 
-		for i in range(24): self.num.insert(str(float(i+1)),str(i+1)+'\n')
+		self.num.grid(row=0, column=0, padx = 2, sticky="nsew") 
+		self.addNums()
 		self.num.config(state="disabled")
+
+		# self.numsb = tk.Scrollbar(self.topFrame , orient=tk.VERTICAL, command=self.num.yview)
+		# self.num.configure(yscrollcommand=self.infosb.set)
+		# self.numsb.grid(row=3, column=3, sticky="ns")
+		self.infosb.grid(row=3, column=4, sticky="ns")
 
 		self.info.tag_config("red", foreground="red")
 		self.info.tag_config("pink", foreground="#ff1155")
@@ -43,10 +62,30 @@ class App(tk.Frame):
 		self.info.tag_config("purple", foreground="#aa00aa")
 		self.info.tag_config("grey", foreground="#aaaaaa")
 
+		self.topFrame.grid(row=3, column=0)
+		self.topFrame.grid_columnconfigure(0, weight=1)
+		self.topFrame.grid_columnconfigure(2, weight=1)
+		self.topFrame.grid_rowconfigure(0, weight=1)
+
 		self.root.bind("<Button>", self.click_handler)
 		self.root.bind('<KeyPress>', self.onKeyPress) 
 		self.info.bind('<KeyPress>', self.onKeyPress) 
 
+	def on_scroll(self, e, t):
+		print(e+t)
+		t = float(t)# - .75
+		if t == .25: t = 1
+		elif t == -.25: t = -1
+		print('on scroll', e, str(t))
+		# self.info.yview_moveto(t) 
+		self.num.yview_scroll(t, "units")
+
+	def addNums(self, n = 24):
+		self.num.config(state="normal")
+		self.num.delete("1.0", "end") 
+		for i in range(n): self.num.insert(str(float(i+1)),str(i+1)+'\n')
+
+		self.num.config(state="disabled")
 
 	def click_handler(self, event):
 		# event also has x & y attributes
@@ -64,6 +103,9 @@ class App(tk.Frame):
 		it = self.info.get("1.0", "end-1c")
 		self.sc.insert("1.0", it)
 
+		line_count = self.info.count("0.0", "end", "displaylines")[0]
+		print('lines:', line_count)
+		if line_count > 24: self.addNums(line_count)
 		# self.info.delete("1.0", "end") 
 		# for l in it.splitlines(keepends=True):
 		# 	d = l.find('.')
@@ -119,6 +161,13 @@ class App(tk.Frame):
 				start, end = match.span()
 				self.info.tag_add("grey", f"1.0 + {start}c", f"1.0 + {end}c")
 
+	def undo(self):
+		print('undo')
+		self.info.edit_undo()
+
+	def redo(self):
+		self.info.edit_redo()
+
 	def onKeyPress(self, event):
 		print(event)
 		k = event.keycode
@@ -143,6 +192,9 @@ class App(tk.Frame):
 			#esc
 			print('exit')
 			self.root.destroy()
+		elif event.state == 8 and event.keysym == 'z':
+			print('click undo')
+			self.undo()
 
 
 	def demo(self):
