@@ -59,21 +59,21 @@ class App(tk.Frame):
 		it = self.info.get("1.0", "end-1c")
 		self.sc.insert("1.0", it)
 
-		self.info.delete("1.0", "end") 
-		for l in it.splitlines(keepends=True):
-			d = l.find('.')
-			if d == None: 
-				self.info.insert("1.0", l )
-				return
-			r = l[0:d]
-			t = l[d:]
-			dd = t.find('.')
-			rr = t[:dd]
-			rrr = t[dd:]
-			print(t, rr)
-			self.info.insert("1.0", r)
-			self.info.insert("1.0", rr , 'red')
-			self.info.insert("1.0", rrr)
+		# self.info.delete("1.0", "end") 
+		# for l in it.splitlines(keepends=True):
+		# 	d = l.find('.')
+		# 	if d == None: 
+		# 		self.info.insert("1.0", l )
+		# 		return
+		# 	r = l[0:d]
+		# 	t = l[d:]
+		# 	dd = t.find('.')
+		# 	rr = t[:dd]
+		# 	rrr = t[dd:]
+		# 	print(t, rr)
+		# 	self.info.insert("1.0", r)
+		# 	self.info.insert("1.0", rr , 'red')
+		# 	self.info.insert("1.0", rrr)
 
 
 	def highlight_syntax(self): 
@@ -104,8 +104,8 @@ class App(tk.Frame):
 			#enter or space
 			print('select')
 			# self.click()
-			# self.update()
 			self.highlight_syntax()
+			self.update()
 
 		elif k == 889192475:
 			#esc
