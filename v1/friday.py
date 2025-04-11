@@ -37,6 +37,11 @@ class App(tk.Frame):
 		self.num.config(state="disabled")
 
 		self.info.tag_config("red", foreground="red")
+		self.info.tag_config("pink", foreground="#ff1155")
+		self.info.tag_config("green", foreground="#00ff24")
+		self.info.tag_config("blue", foreground="#00aaff")
+		self.info.tag_config("purple", foreground="#aa00aa")
+		self.info.tag_config("grey", foreground="#aaaaaa")
 
 		self.root.bind("<Button>", self.click_handler)
 		self.root.bind('<KeyPress>', self.onKeyPress) 
@@ -78,14 +83,41 @@ class App(tk.Frame):
 
 	def highlight_syntax(self): 
 		keywords = [ "def", "class", "if", "else", "elif", "for", "while", "return", 
-		"import", "from", 'get', 'set', 'append', 'remove', 'break',
-		'None', 'True', 'False']
+		'get', 'set', 'append', 'remove' , 'print']
+		key2 = [ 'self', 'import', 'from', 'break', 'None', 'True', 'False']
 		content = self.info.get("1.0", tk.END)
 		for keyword in keywords:
 			for match in re.finditer(r"\b" + keyword + r"\b", content):
 				start, end = match.span()
-				self.info.tag_add("red", f"1.0 + {start}c", f"1.0 + {end}c")
+				self.info.tag_add("pink", f"1.0 + {start}c", f"1.0 + {end}c")
 
+		for keyword in key2:
+			for match in re.finditer(r"\b" + keyword + r"\b", content):
+				start, end = match.span()
+				self.info.tag_add("red", f"1.0 + {start}c", f"1.0 + {end}c")
+		#strings
+		pattern = r'\(|\)'
+		for match in re.finditer(pattern, content):
+				start, end = match.span()
+				self.info.tag_add("purple", f"1.0 + {start}c", f"1.0 + {end}c")
+		pattern = r'"*"'
+		for match in re.finditer(pattern, content):
+				start, end = match.span()
+				self.info.tag_add("blue", f"1.0 + {start}c", f"1.0 + {end}c")
+		pattern = r"'*'"
+		for match in re.finditer(pattern, content):
+				start, end = match.span()
+				self.info.tag_add("blue", f"1.0 + {start}c", f"1.0 + {end}c")
+		#numbers
+		pattern = r'\b\d+\b'
+		for match in re.finditer(pattern, content):
+				start, end = match.span()
+				self.info.tag_add("green", f"1.0 + {start}c", f"1.0 + {end}c")
+		#comments
+		pattern = r'#.*'
+		for match in re.finditer(pattern, content):
+				start, end = match.span()
+				self.info.tag_add("grey", f"1.0 + {start}c", f"1.0 + {end}c")
 
 	def onKeyPress(self, event):
 		print(event)
