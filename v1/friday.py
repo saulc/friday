@@ -1,27 +1,34 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
+import re
+
 class App(tk.Frame):
 	def __init__(self, root):
 		super().__init__(root)
 		# self.pack() 
 		self.mode = 1 #0 files 1 db 
 		self.root = root
-		self.root.geometry('1200x1080')
+		self.root.geometry('1000x1080')
 		self.root.configure(background="black" )
 		self.root.wm_attributes('-alpha', 0.8)
 
 		n = tkFont.families()[11]
 		print('Font:', n)
-		self.myFont = tkFont.Font(family=n, size=14, weight="bold")
-		self.h = 36
-		self.w = 88
+		self.myFont = tkFont.Font(family=n, size=12, weight="normal")
+		self.scFont = tkFont.Font(family=n, size=4, weight="normal")
+		self.h = 30
+		self.w = 60
 		self.info = tk.Text(self.root,wrap='word', font=self.myFont, width=self.w, height=self.h)
 		self.info.configure(background="black", foreground="white", highlightbackground="black" )
 		self.info.grid(row=3, column=1) 
-		self.info.insert("1.0", 'friday'+ "\n")
-		self.info.insert("2.0", "...")
+		self.info.insert("1.0", 'friday')
+		# self.info.insert("2.0", "...")
 
+		self.sc = tk.Text(self.root ,wrap='word', font=self.scFont, width=60, height=self.h*2)
+		self.sc.configure(background="black", foreground="#ff1155", highlightbackground="black" )
+		self.sc.grid(row=3, column=2, padx = 6) 
+		# self.update()
 
 		self.num = tk.Text(self.root,wrap='word', font=self.myFont, width=2, height=self.h)
 		self.num.configure(background="black", foreground="#ff1155", highlightbackground="black" )
@@ -29,9 +36,12 @@ class App(tk.Frame):
 		for i in range(24): self.num.insert(str(float(i+1)),str(i+1)+'\n')
 		self.num.config(state="disabled")
 
+		self.info.tag_config("red", foreground="red")
 
 		self.root.bind("<Button>", self.click_handler)
 		self.root.bind('<KeyPress>', self.onKeyPress) 
+		self.info.bind('<KeyPress>', self.onKeyPress) 
+
 
 	def click_handler(self, event):
 		# event also has x & y attributes
@@ -43,6 +53,39 @@ class App(tk.Frame):
 
 	def click(self):
 		pass
+
+	def update(self):
+		self.sc.delete("1.0", "end") 
+		it = self.info.get("1.0", "end-1c")
+		self.sc.insert("1.0", it)
+
+		self.info.delete("1.0", "end") 
+		for l in it.splitlines(keepends=True):
+			d = l.find('.')
+			if d == None: 
+				self.info.insert("1.0", l )
+				return
+			r = l[0:d]
+			t = l[d:]
+			dd = t.find('.')
+			rr = t[:dd]
+			rrr = t[dd:]
+			print(t, rr)
+			self.info.insert("1.0", r)
+			self.info.insert("1.0", rr , 'red')
+			self.info.insert("1.0", rrr)
+
+
+	def highlight_syntax(self): 
+		keywords = [ "def", "class", "if", "else", "elif", "for", "while", "return", 
+		"import", "from", 'get', 'set', 'append', 'remove', 'break',
+		'None', 'True', 'False']
+		content = self.info.get("1.0", tk.END)
+		for keyword in keywords:
+			for match in re.finditer(r"\b" + keyword + r"\b", content):
+				start, end = match.span()
+				self.info.tag_add("red", f"1.0 + {start}c", f"1.0 + {end}c")
+
 
 	def onKeyPress(self, event):
 		print(event)
@@ -57,10 +100,13 @@ class App(tk.Frame):
 			#delete
 			print('up')
 			self.mfiles.goUp()
-		elif k == 603979789 or k == 822083616:
+		elif k == 603979789: # or k == 822083616:
 			#enter or space
 			print('select')
-			self.click()
+			# self.click()
+			# self.update()
+			self.highlight_syntax()
+
 		elif k == 889192475:
 			#esc
 			print('exit')
